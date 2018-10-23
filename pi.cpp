@@ -3,12 +3,14 @@
 #include <cstdlib>
 #include <pthread.h>
 
-void* estimate_pi(void* num_toss);
+void* estimate_pi(void* id);
 
 
 long long int num_toss;
-long long int glb_num_in_circle = 0;
-pthread_mutex_t mutex;
+long long int eve_glb_num_in_circle = 0;
+long long int odd_glb_num_in_circle = 0;
+long long int work_load;
+pthread_mutex_t mutex_eve, mutex_odd;
 
 
 int main(int argc, char** argv)
@@ -28,22 +30,23 @@ int main(int argc, char** argv)
     }
 
     // init mutex
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mutex_eve, NULL);
+    pthread_mutex_init(&mutex_odd, NULL);
 
     // calculate workload per thread and 
     // spawn threads to estimate pi
-    long long int work_load = num_toss / num_core;
+    work_load = num_toss / num_core;
     pthread_t *thread_handler = new pthread_t[num_core-1];
-    for(int thread=0; thread<num_core-1; thread++)
+    for(long thread=0; thread<num_core-1; thread++)
         pthread_create(
                 &thread_handler[thread]
                 , NULL
                 , estimate_pi
-                , (void*)work_load
+                , (void*)thread
                 );
 
     // main thread estimate pi
-    estimate_pi((void*)work_load);
+    estimate_pi((void*)(num_toss-1));
 
     // join
     for(int thread=0; thread<num_core-1; thread++)
@@ -51,27 +54,27 @@ int main(int argc, char** argv)
 
     // calculate estimated pi and print out
     double pi_estimate = 
-        4*glb_num_in_circle / ((double) num_toss);
+        4*(eve_glb_num_in_circle+odd_glb_num_in_circle) / ((double) num_toss);
     std::cout << pi_estimate << std::endl;
 
     // free memory and destroy mutex
     delete [] thread_handler;
-    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&mutex_eve);
+    pthread_mutex_destroy(&mutex_odd);
 }
 
-void* estimate_pi(void* work_load)
+void* estimate_pi(void* id)
 {
     // set up random generator
-    // TODO: thread safe?
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(-1.0, 1.0);
 
-    long long int num_toss = (long long int)work_load;
     long long int num_in_circule = 0;
     double x, y, dis_sqr;
+    long tid = (long)id;
 
-    for(long long int toss=0; toss<num_toss; toss++)
+    for(long long int toss=0; toss<work_load; toss++)
     {
         x = dis(gen);
         y = dis(gen);
@@ -81,9 +84,18 @@ void* estimate_pi(void* work_load)
     }
 
     // add result to global sum
-    pthread_mutex_lock(&mutex);
-    glb_num_in_circle += num_in_circule;
-    pthread_mutex_unlock(&mutex);
+    if(tid%2 == 0)
+    {
+        pthread_mutex_lock(&mutex_eve);
+        eve_glb_num_in_circle += num_in_circule;
+        pthread_mutex_unlock(&mutex_eve);
+    }
+    else
+    {
+        pthread_mutex_lock(&mutex_odd);
+        odd_glb_num_in_circle += num_in_circule;
+        pthread_mutex_unlock(&mutex_odd);
+    }
 
     return NULL;
 }

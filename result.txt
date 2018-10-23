@@ -8,3 +8,9 @@ result:
 seq 2 10000000: 3.14188 17.781s
 thread 2 10000000: 3.14138 9.904s (efficiency: 89.4%)
 thread 4 10000000: 3.1414 7.3526s (efficiency: 60.2%)
+
+[version 1.1]
+description: use 2 global sum to seperate mutex overhead
+result:
+thread 2 10000000: 3.14146 9.845s (efficiency: 90.3%)
+thread 4 10000000: 3.14172 7.068s (efficiency: 62.7%)
