@@ -1,0 +1,10 @@
+[version 0.5]
+description: add mutex to glb_sum
+result: more accurate
+
+[version 1]
+description: make gernerator thread local (consume more memory)
+result:
+seq 2 10000000: 3.14188 17.781s
+thread 2 10000000: 3.14138 9.904s (efficiency: 89.4%)
+thread 4 10000000: 3.1414 7.3526s (efficiency: 60.2%)
