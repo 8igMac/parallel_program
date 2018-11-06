@@ -22,3 +22,23 @@ $ g++ pi.cpp -o thread -lpthread
 ```
 $ sh run.sh NUM_CORE NUM_TOSS
 ```
+
+# OpenMP Programming
+Parallelize a serial implementaion of the conjugate gradient 
+method using OpenMP.
+
+## How to run
+1. build 
+```
+$ make DATASIZE=[LARGE|MEDIUMN|SMALL]
+# (If not assign DATASIZE, default will be mediumn)
+# Please do make clean if you want to change datasize.
+```
+2. run
+```
+$ ./bin/cg
+```
+3. clean 
+```
+$ make clean
+```
