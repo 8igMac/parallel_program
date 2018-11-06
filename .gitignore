@@ -3,3 +3,9 @@ a.out
 test.cpp
 thread
 seq
+
+# for openmp
+openmp/bin
+openmp/common/*.o
+openmp/*.o
+openmp/*~
